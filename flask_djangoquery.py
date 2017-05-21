@@ -67,8 +67,8 @@ def get_entity_propnames(entity):
     is_instance_state = isinstance(entity, InstanceState)
     ins = entity if is_instance_state else inspection.inspect(entity)
     return set(
-        ins.mapper.column_attrs.keys() +  # Columns
-        ins.mapper.relationships.keys()  # Relationships
+        list(ins.mapper.column_attrs.keys()) +  # Columns
+        list(ins.mapper.relationships.keys())  # Relationships
     )
 
 
@@ -176,7 +176,7 @@ class DjangoQuery(BaseQuery):
     def select_related(self, *columns, **options):
         depth = options.pop('depth', None)
         if options:
-            raise TypeError('Unexpected argument %r' % iter(options).next())
+            raise TypeError('Unexpected argument %r' % next(iter(options)))
         if depth not in (None, 1):
             raise TypeError('Depth can only be 1 or None currently')
         need_all = depth is None
@@ -194,7 +194,7 @@ class DjangoQuery(BaseQuery):
         joins_needed = []
         for idx, arg in enumerate(args):
             q = self
-            if not isinstance(arg, basestring):
+            if not isinstance(arg, str):
                 continue
             if arg[0] in '+-':
                 desc = arg[0] == '-'
@@ -225,7 +225,7 @@ class DjangoQuery(BaseQuery):
         negate_if = lambda expr: expr if not negate else ~expr
         column = None
 
-        for arg, value in kwargs.iteritems():
+        for arg, value in kwargs.items():
             for token in arg.split('__'):
                 if column is None:
                     column = _entity_descriptor(q._joinpoint_zero(), token)
